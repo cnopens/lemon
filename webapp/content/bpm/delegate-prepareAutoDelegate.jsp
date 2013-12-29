@@ -9,11 +9,6 @@
     <%@include file="/common/meta.jsp"%>
     <title>编辑</title>
     <%@include file="/common/s.jsp"%>
-	<script type="text/javascript">
-$(function() {
-    $('.datepicker').datepicker({format:'yyyy-mm-dd'});
-});
-	</script>
   </head>
 
   <body>

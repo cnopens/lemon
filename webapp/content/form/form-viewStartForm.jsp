@@ -14,6 +14,11 @@
     <script type="text/javascript" src="${ctx}/xform/container-layout.js"></script>
     <script type="text/javascript" src="${ctx}/xform/adaptor.js"></script>
     <script type="text/javascript">
+document.onmousedown = function(e) {};
+document.onmousemove = function(e) {};
+document.onmouseup = function(e) {};
+document.ondblclick = function(e) {};
+
 $(function() {
     $("#demoForm").validate({
         submitHandler: function(form) {
@@ -98,7 +103,7 @@ $(function() {
 			  <form id="xf-form" method="post" action="${scopePrefix}/form/form!startProcessInstance.do?operationMode=STORE" class="xf-form">
 <input id="processDefinitionId" type="hidden" name="processDefinitionId" value="${formInfo.processDefinitionId}">
 <input id="autoCompleteFirstTask" type="hidden" name="autoCompleteFirstTask" value="${formInfo.autoCompleteFirstTask}">
-<input id="businessKey" type="hidden" name="businessKey" value="${dynamicModel.id}">
+<input id="businessKey" type="hidden" name="businessKey" value="${param.businessKey}">
 <!--
 <input id="taskId" type="hidden" name="taskId" value="${taskId}">
 -->
@@ -129,18 +134,18 @@ $(function() {
 
 
 
-
+      <!--
 	  <article class="m-blank">
 	    <div class="pull-left">
-		  <form name="userForm" method="post" action="user.do" class="form-inline m-form-bottom">
+		  <form name="userForm" method="post" action="javascript:void(0);return false;" class="form-inline m-form-bottom">
     	    <label for="user_username">账号:</label>
 			<input type="text" id="user_username" name="filter_LIKES_username" value="">
 			<button class="btn btn-small" onclick="document.userForm.submit()">查询</button>
 		  </form>
 		</div>
-
 	    <div class="m-clear"></div>
 	  </article>
+      -->
 
       <article class="m-widget">
         <header class="header">

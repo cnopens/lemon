@@ -79,6 +79,7 @@ public class UserConnectorBatchAction extends BaseAction {
                         userStatusChecker.check(userStatus);
                         userStatuses.add(userStatus);
                     } catch (CheckUserStatusException ex) {
+                        logger.warn(ex.getMessage(), ex);
                         addActionMessage(ex.getMessage());
                     }
                 }
@@ -89,15 +90,14 @@ public class UserConnectorBatchAction extends BaseAction {
                 ScopeHolder.getScopeId());
         roleDtos.addAll(convertRoleDtos(roles, false));
 
-        List<ScopeInfo> sharedScopeInfos = scopeConnector.findSharedScopes();
+        // List<ScopeInfo> sharedScopeInfos = scopeConnector.findSharedScopes();
 
-        logger.info("{}", sharedScopeInfos);
+        // logger.info("{}", sharedScopeInfos);
 
-        for (ScopeInfo scopeInfo : sharedScopeInfos) {
-            List<Role> sharedRoles = authService.findRoles(scopeInfo.getId());
-            roleDtos.addAll(convertRoleDtos(sharedRoles, true));
-        }
-
+        // for (ScopeInfo scopeInfo : sharedScopeInfos) {
+        // List<Role> sharedRoles = authService.findRoles(scopeInfo.getId());
+        // roleDtos.addAll(convertRoleDtos(sharedRoles, true));
+        // /}
         return INPUT;
     }
 

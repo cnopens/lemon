@@ -11,11 +11,11 @@
 		<property name="jobExecutorActivate" value="false" />
 		<!-- mail server configurations -->
 		<property name="mailServerPort" value="5025" />
-		<property name="history" value="full" />
+		<property name="history" value="audit" />
 
  		<property name="customDefaultBpmnParseHandlers">
     	 	<list>
-				<bean class="com.mossle.bpm.handler.ProxyUserTaskBpmnParseHandler"/>
+				<bean class="com.mossle.bpm.listener.ProxyUserTaskBpmnParseHandler"/>
     	 	</list>
 		</property>
 
@@ -26,7 +26,7 @@
 
 		<property name="transactionManager" ref="transactionManager"/>
 		<!-- (databaseType 不用修改,即使连接其他类型数据库)  act引擎会自动替换成相应的type,这里加上是因为act不识别hsqldb类型,故直接映射成H2-->
-		<property name="databaseType" value="h2"/>
+		<property name="databaseType" value="${application.database.type}"/>
 
 		<!-- 生成流程图的字体 -->
         <property name="activityFontName" value="宋体"/>
@@ -94,12 +94,14 @@
 	</bean>
 
 	<!-- 全局任务监听器 -->
-	<bean id="proxyTaskListener" class="com.mossle.bpm.handler.ProxyTaskListener">
+	<bean id="proxyTaskListener" class="com.mossle.bpm.listener.ProxyTaskListener">
 		<property name="taskListeners">
 			<list>
 				<bean class="com.mossle.bpm.delegate.DelegateTaskListener"/>
-				<bean class="com.mossle.bpm.handler.AutoCompleteFirstTaskListener"/>
-				<bean class="com.mossle.bpm.handler.AssigneeAliasTaskListener"/>
+				<bean class="com.mossle.bpm.listener.AutoCompleteFirstTaskListener"/>
+				<bean class="com.mossle.bpm.listener.AssigneeAliasTaskListener"/>
+				<bean class="com.mossle.bpm.listener.TaskConfTaskListener"/>
+				<bean class="com.mossle.bpm.listener.NoticeTaskListener"/>
 			</list>
 		</property>
 	</bean>

@@ -20,8 +20,11 @@
 	<!-- start of main -->
     <section id="m-main" class="span10" style="float:right">
 
-<a href="modeler!open.do" class="btn" target="_blank">新建模型</a>
-<br>
+	  <article style="margin-bottom:10px;">
+	    <a href="modeler!open.do" class="btn btn-small" target="_blank">新建模型</a>
+
+	    <div class="m-clear"></div>
+	  </article>
 
       <article class="m-widget">
         <header class="header">
@@ -60,7 +63,7 @@
 	    <td>${item.metaInfo}</td>
         <td>
 		  <a href="modeler!open.do?id=${item.id}" target="_blank">编辑</a>
-		  <a href="modeler!removeModeler.do?id=${item.id}">删除</a>
+		  <a href="modeler!removeModel.do?id=${item.id}">删除</a>
 		  <a href="modeler!deploy.do?id=${item.id}">发布</a>
         </td>
       </tr>

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mossle.api.UserConnector;
-import com.mossle.api.UserDTO;
-import com.mossle.api.scope.ScopeConnector;
 import com.mossle.api.scope.ScopeHolder;
 
 import com.mossle.core.export.Exportor;
@@ -47,7 +45,6 @@ public class DocInfoAction extends BaseAction implements ModelDriven<DocInfo>,
     private Exportor exportor = new Exportor();
     private BeanMapper beanMapper = new BeanMapper();
     private UserConnector userConnector;
-    private ScopeConnector scopeConnector;
     private File attachment;
 
     public void setAttachment(File attachment) {
@@ -93,8 +90,23 @@ public class DocInfoAction extends BaseAction implements ModelDriven<DocInfo>,
         new File("target/uploaded").mkdirs();
 
         File targetFile = new File("target/uploaded", attachment.getName());
-        IoUtils.copyStream(new FileInputStream(attachment),
-                new FileOutputStream(targetFile));
+        InputStream is = null;
+        OutputStream os = null;
+
+        try {
+            is = new FileInputStream(attachment);
+            os = new FileOutputStream(targetFile);
+            IoUtils.copyStream(is, os);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+
+            if (os != null) {
+                os.close();
+            }
+        }
+
         dest.setPath(targetFile.getName());
         docInfoManager.save(dest);
 
@@ -106,8 +118,17 @@ public class DocInfoAction extends BaseAction implements ModelDriven<DocInfo>,
     public void download() throws Exception {
         DocInfo docInfo = docInfoManager.get(id);
         File file = new File("target/uploaded", docInfo.getPath());
-        IoUtils.copyStream(new FileInputStream(file), ServletActionContext
-                .getResponse().getOutputStream());
+        InputStream is = null;
+
+        try {
+            is = new FileInputStream(file);
+            IoUtils.copyStream(is, ServletActionContext.getResponse()
+                    .getOutputStream());
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
     }
 
     public String removeAll() {
@@ -172,9 +193,5 @@ public class DocInfoAction extends BaseAction implements ModelDriven<DocInfo>,
 
     public void setUserConnector(UserConnector userConnector) {
         this.userConnector = userConnector;
-    }
-
-    public void setScopeConnector(ScopeConnector scopeConnector) {
-        this.scopeConnector = scopeConnector;
     }
 }

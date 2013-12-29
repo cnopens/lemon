@@ -13,7 +13,6 @@ import com.mossle.bpm.cmd.CounterSignCmd;
 import com.mossle.bpm.cmd.HistoryProcessInstanceDiagramCmd;
 import com.mossle.bpm.cmd.ProcessDefinitionDiagramCmd;
 import com.mossle.bpm.cmd.RollbackTaskCmd;
-import com.mossle.bpm.cmd.TaskDiagramCmd;
 import com.mossle.bpm.cmd.WithdrawTaskCmd;
 import com.mossle.bpm.persistence.domain.BpmCategory;
 import com.mossle.bpm.persistence.manager.BpmCategoryManager;
@@ -36,10 +35,11 @@ import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.impl.ServiceImpl;
 import org.activiti.engine.impl.interceptor.Command;
-import org.activiti.engine.impl.interceptor.CommandExecutor;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
+
+import org.apache.commons.io.IOUtils;
 
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
@@ -63,10 +63,11 @@ public class WorkspaceAction extends BaseAction {
     private List<HistoricProcessInstance> historicProcessInstances;
     private List<HistoricVariableInstance> historicVariableInstances;
     private String username;
-    private CommandExecutor commandExecutor;
     private BpmCategoryManager bpmCategoryManager;
     private List<BpmCategory> bpmCategories;
     private String operationType;
+    private String processDefinitionKey;
+    private int processDefinitionVersion;
 
     public String home() {
         bpmCategories = bpmCategoryManager.getAll("priority", true);
@@ -74,6 +75,30 @@ public class WorkspaceAction extends BaseAction {
         return "home";
     }
 
+    public void graphProcessDefinition() throws Exception {
+        RepositoryService repositoryService = processEngine
+                .getRepositoryService();
+
+        if (processDefinitionId == null) {
+            processDefinitionId = repositoryService
+                    .createProcessDefinitionQuery()
+                    .processDefinitionKey(processDefinitionKey)
+                    .processDefinitionVersion(processDefinitionVersion)
+                    .singleResult().getId();
+        }
+
+        Command<InputStream> cmd = null;
+        cmd = new ProcessDefinitionDiagramCmd(processDefinitionId);
+
+        InputStream is = processEngine.getManagementService().executeCommand(
+                cmd);
+        HttpServletResponse response = ServletActionContext.getResponse();
+        response.setContentType("image/png");
+
+        IOUtils.copy(is, response.getOutputStream());
+    }
+
+    // ~ ======================================================================
     public String endProcessInstance() {
         processEngine.getRuntimeService().deleteProcessInstance(
                 processInstanceId, "end");
@@ -140,61 +165,16 @@ public class WorkspaceAction extends BaseAction {
     }
 
     /**
-     * 查看流程定义的流程图
-     * 
-     * @throws Exception
-     */
-    public void graphProcessDefinition() throws Exception {
-        RepositoryService repositoryService = processEngine
-                .getRepositoryService();
-        Command<InputStream> cmd = null;
-        cmd = new ProcessDefinitionDiagramCmd(processDefinitionId);
-
-        InputStream is = ((ServiceImpl) repositoryService).getCommandExecutor()
-                .execute(cmd);
-        HttpServletResponse response = ServletActionContext.getResponse();
-        response.setContentType("image/png");
-
-        int len = 0;
-        byte[] b = new byte[1024];
-
-        while ((len = is.read(b, 0, 1024)) != -1) {
-            response.getOutputStream().write(b, 0, len);
-        }
-    }
-
-    public void graphTask() throws Exception {
-        RepositoryService repositoryService = processEngine
-                .getRepositoryService();
-        Command<InputStream> cmd = null;
-        cmd = new TaskDiagramCmd(taskId);
-
-        InputStream is = ((ServiceImpl) repositoryService).getCommandExecutor()
-                .execute(cmd);
-        HttpServletResponse response = ServletActionContext.getResponse();
-        response.setContentType("image/png");
-
-        int len = 0;
-        byte[] b = new byte[1024];
-
-        while ((len = is.read(b, 0, 1024)) != -1) {
-            response.getOutputStream().write(b, 0, len);
-        }
-    }
-
-    /**
      * 流程跟踪
      * 
      * @throws Exception
      */
     public void graphHistoryProcessInstance() throws Exception {
-        RepositoryService repositoryService = processEngine
-                .getRepositoryService();
-        Command<InputStream> cmd = null;
-        cmd = new HistoryProcessInstanceDiagramCmd(processInstanceId);
+        Command<InputStream> cmd = new HistoryProcessInstanceDiagramCmd(
+                processInstanceId);
 
-        InputStream is = ((ServiceImpl) repositoryService).getCommandExecutor()
-                .execute(cmd);
+        InputStream is = processEngine.getManagementService().executeCommand(
+                cmd);
         HttpServletResponse response = ServletActionContext.getResponse();
         response.setContentType("image/png");
 
@@ -415,7 +395,7 @@ public class WorkspaceAction extends BaseAction {
     public String rollback() {
         Command<Integer> cmd = new RollbackTaskCmd(taskId);
 
-        commandExecutor.execute(cmd);
+        processEngine.getManagementService().executeCommand(cmd);
 
         return RELOAD;
     }
@@ -428,7 +408,7 @@ public class WorkspaceAction extends BaseAction {
     public String withdraw() {
         Command<Integer> cmd = new WithdrawTaskCmd(taskId);
 
-        commandExecutor.execute(cmd);
+        processEngine.getManagementService().executeCommand(cmd);
 
         return RELOAD;
     }
@@ -509,10 +489,6 @@ public class WorkspaceAction extends BaseAction {
         this.username = username;
     }
 
-    public void setCommandExecutor(CommandExecutor commandExecutor) {
-        this.commandExecutor = commandExecutor;
-    }
-
     public void setBpmCategoryManager(BpmCategoryManager bpmCategoryManager) {
         this.bpmCategoryManager = bpmCategoryManager;
     }
@@ -523,5 +499,13 @@ public class WorkspaceAction extends BaseAction {
 
     public void setOperationType(String operationType) {
         this.operationType = operationType;
+    }
+
+    public void setProcessDefinitionKey(String processDefinitionKey) {
+        this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public void setProcessDefinitionVersion(int processDefinitionVersion) {
+        this.processDefinitionVersion = processDefinitionVersion;
     }
 }

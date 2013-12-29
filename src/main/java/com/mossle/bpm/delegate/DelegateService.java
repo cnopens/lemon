@@ -13,6 +13,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.stereotype.Component;
 
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional
 @Component
 public class DelegateService {
     private static Logger logger = LoggerFactory
@@ -84,7 +87,7 @@ public class DelegateService {
         Date now = new Date();
 
         if (startTime != null) {
-            return now.after(startTime);
+            return now.before(startTime);
         }
 
         if (endTime != null) {

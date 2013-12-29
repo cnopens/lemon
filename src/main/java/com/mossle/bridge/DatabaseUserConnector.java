@@ -42,6 +42,7 @@ public class DatabaseUserConnector implements UserConnector {
 
             return convertUserDTO(map);
         } catch (EmptyResultDataAccessException ex) {
+            logger.debug(ex.getMessage(), ex);
             logger.info("user[{}] is not exists.", id);
 
             return null;
@@ -55,6 +56,7 @@ public class DatabaseUserConnector implements UserConnector {
 
             return convertUserDTO(map);
         } catch (EmptyResultDataAccessException ex) {
+            logger.debug(ex.getMessage(), ex);
             logger.info("user[{}, {}] is not exists.", username, globalId);
 
             return null;
@@ -68,6 +70,7 @@ public class DatabaseUserConnector implements UserConnector {
 
             return convertUserDTO(map);
         } catch (EmptyResultDataAccessException ex) {
+            logger.debug(ex.getMessage(), ex);
             logger.info("user[{}, {}] is not exists.", username, userRepoRef);
 
             return null;
@@ -174,6 +177,11 @@ public class DatabaseUserConnector implements UserConnector {
 
     public void setSqlFindByUsername(String sqlFindByUsername) {
         this.sqlFindByUsername = sqlFindByUsername;
+    }
+
+    public void setSqlFindByUsernameAndUserRepoRef(
+            String sqlFindByUsernameAndUserRepoRef) {
+        this.sqlFindByUsernameAndUserRepoRef = sqlFindByUsernameAndUserRepoRef;
     }
 
     public void setAliasMap(Map<String, String> aliasMap) {
